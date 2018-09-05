@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/asiainfoLDP/servicebroker-plan-api/tools"
 	"github.com/coreos/etcd/client"
-	"golang.org/x/net/context"
+	//"golang.org/x/net/context"
 	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"strconv"
 	"strings"
@@ -101,7 +101,17 @@ func PollingPlan(c *gin.Context) {
 func Deprovision(c *gin.Context) {
 	ins := c.Param("serviceinstance")
 	etcdC := etcdclient.GetEtcdApi()
-	etcdC.Delete(context.Background(),"",)
+	req,err := etcdC.Delete(context.Background(),ins,&client.DeleteOptions{})
+	if err != nil{
+		log.Logger.Error("Can not Deprovision serviceinstace from etcd", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "can not delete serviceinstance from etcd"
+		c.JSON(http.StatusNotImplemented, errinfo)
+		return
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
 }
 
 func Update(c *gin.Context) {
@@ -113,5 +123,15 @@ func Update(c *gin.Context) {
 	}
 	defer c.Request.Body.Close()
 	etcdC := etcdclient.GetEtcdApi()
-	etcdC.Update(context.Background(),)
+	req,err := etcdC.Update(context.Background(),ins,string(rBody))
+	if err != nil{
+		log.Logger.Error("Can not Deprovision serviceinstace from etcd", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "can not delete serviceinstance from etcd"
+		c.JSON(http.StatusNotImplemented, errinfo)
+		return
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
 }
