@@ -1,16 +1,16 @@
 package planapi
 
 type Service struct {
-	Name                  string           `json:"name"`
-	Id                    string           `json:"id"`
-	Description           string           `json:"description"`
-	Tags                  string         `json:"tags,omitempty"`
-	Requires              string         `json:"requires,omitempty"`
-	Bindable              bool             `json:"bindable"`
-	Metadata              interface{}      `json:"metadata,omitempty"`
-	Dashboard_client      *DashboardClient `json:"dashboard_client,omitempty"`
-	PlanUpdatable         bool             `json:"plan_updateable,omitempty"`
-	Plans                 []Plan           `json:"plans"`
+	Name             string           `json:"name"`
+	Id               string           `json:"id"`
+	Description      string           `json:"description"`
+	Tags             []string         `json:"tags,omitempty"`
+	Requires         []string         `json:"requires,omitempty"`
+	Bindable         bool             `json:"bindable"`
+	Metadata         interface{}      `json:"metadata,omitempty"`
+	Dashboard_client *DashboardClient `json:"dashboard_client,omitempty"`
+	PlanUpdatable    bool             `json:"plan_updateable,omitempty"`
+	Plans            []Plan           `json:"plans"`
 }
 
 type Plan struct {
