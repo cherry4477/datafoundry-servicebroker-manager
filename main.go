@@ -47,10 +47,11 @@ func handle() (router *gin.Engine) {
 	}))
 
 	router.GET("/plans/catalog", planapi.Catalog)
-	router.PUT("/plans/provision", planapi.Provision)
-	router.DELETE("/plans/deprovision", planapi.Deprovision)
 	router.PATCH("/plans/update", planapi.Update)
 	router.GET("/services/:service_id/plans/:plan_id", planapi.PollingPlan)
+
+	router.PUT("/plans/provision/serviceinstance/:serviceinstance", planapi.Provision)
+	router.DELETE("/plans/deprovision/serviceinstance/:serviceinstance", planapi.Deprovision)
 
 	return
 }

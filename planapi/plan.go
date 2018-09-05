@@ -16,14 +16,15 @@ func Provision(c *gin.Context) {
 
 }
 
-func Deprovision(c *gin.Context) {
-
-}
-
-func Update(c *gin.Context) {
-
-}
 
 func PollingPlan(c *gin.Context) {
 
+}
+
+func Deprovision(c *gin.Context) {
+	ins := c.Param("serviceinstance")
+}
+
+func Update(c *gin.Context) {
+	ins := c.Param("serviceinstance")
 }
