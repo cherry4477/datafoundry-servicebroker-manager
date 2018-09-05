@@ -124,7 +124,7 @@ func ProvisionService(c *gin.Context) {
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
 	for i,v := range pservice.Services{
-		tagName ,value := getTag(&v,v,i)
+		tagName ,value := getTag(&v,i)
 		key += "/" + tagName
 		req,err = etcdC.Update(context.Background(),key,value)
 		if err != nil{
@@ -159,7 +159,7 @@ func ProvisionPlan(c *gin.Context) {
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
 	for i,v := range pservice.Services{
-		tagName,value := getTag(&v,v,i)
+		tagName,value := getTag(&v,i)
 		key += "/" + tagName
 		req,err = etcdC.Update(context.Background(),key,value)
 		if err != nil{
@@ -210,11 +210,11 @@ func DeprovisionPlan(c *gin.Context) {
 	return
 }
 
-func getTag(u interface{},vu interface{},index int)(tag string,value string){
+func getTag(u interface{},index int)(tag string,value string){
 	t := reflect.TypeOf(u)
-	v := reflect.ValueOf(vu)
+	v := reflect.ValueOf(u)
 	field := t.Elem().Field(index)
-	vName := v.FieldByName(field.Name)
+	vName := v.Elem().FieldByName(field.Name)
 	tag = field.Tag.Get("json")
 	value = fmt.Sprintf("%v", vName.Interface())
 	return
