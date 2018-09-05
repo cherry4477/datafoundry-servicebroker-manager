@@ -211,13 +211,9 @@ func DeprovisionPlan(c *gin.Context) {
 }
 
 func getTag(u interface{},vu interface{},index int)(tag string,value string){
-	//t := reflect.TypeOf(u)
-	//field := t.Elem().Field(index)
-	//return  field.Tag.Get("json")
-
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(vu)
-	field := t.Elem().Field(0)
+	field := t.Elem().Field(index)
 	vName := v.FieldByName(field.Name)
 	tag = field.Tag.Get("json")
 	value = fmt.Sprintf("%v", vName.Interface())
