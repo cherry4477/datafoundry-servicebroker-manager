@@ -46,11 +46,16 @@ func handle() (router *gin.Engine) {
 		//username: password,
 	}))
 
-	router.GET("/plans/catalog", planapi.Catalog)
-	router.PUT("/plans/provision", planapi.Provision)
-	router.DELETE("/plans/deprovision", planapi.Deprovision)
-	router.PATCH("/plans/update", planapi.Update)
-	router.GET("/services/:service_id/plans/:plan_id", planapi.PollingPlan)
+	router.GET("/seapi/catalog", planapi.Catalog)
+	router.GET("/seapi/services/:service_id", planapi.PollingService)
+	router.GET("/seapi/services/:service_id/plans/:plan_id", planapi.PollingPlan)
+	router.POST("/seapi/services/:service_id", planapi.ProvisionService)
+	router.POST("/seapi/services/:service_id/plans/:plan_id", planapi.ProvisionPlan)
+
+	router.PUT("/seapi/services/:service_id", planapi.ProvisionService)
+	router.PUT("/seapi/services/:service_id/plans/:plan_id", planapi.ProvisionPlan)
+	router.DELETE("/seapi/services/:service_id", planapi.DeprovisionService)
+	router.DELETE("/seapi/services/:service_id/plans/:plan_id", planapi.DeprovisionPlan)
 
 	return
 }
