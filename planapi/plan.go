@@ -9,6 +9,7 @@ var etcdclient tools.EtcdClient
 
 func Catalog(c *gin.Context) {
 
+
 }
 
 func Provision(c *gin.Context) {

@@ -42,15 +42,15 @@ func handle() (router *gin.Engine) {
 
 	//var username, password string
 	router.Use(gin.BasicAuth(gin.Accounts{
+		"asiainfoLDP": "2016asia",
 		//username: password,
-		"wuchao": "111111",
 	}))
 
-	router.GET("/plan/catalog", planapi.Catalog)
-	router.PUT("/v2/service_instances/:instance_id", planapi.Provision)
-	router.DELETE("/v2/service_instances/:instance_id", planapi.Deprovision)
-	router.PATCH("/v2/service_instances/:instance_id", planapi.Update)
-	router.GET("/v2/service_instances/:instance_id/service_bindings/:binding_id", planapi.PollingPlan)
+	router.GET("/plans/catalog", planapi.Catalog)
+	router.PUT("/plans/provision", planapi.Provision)
+	router.DELETE("/plans/deprovision", planapi.Deprovision)
+	router.PATCH("/plans/update", planapi.Update)
+	router.GET("/services/:service_id/plans/:plan_id", planapi.PollingPlan)
 
 	return
 }
