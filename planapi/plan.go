@@ -10,9 +10,15 @@ import (
 	//"golang.org/x/net/context"
 	"encoding/json"
 	"github.com/asiainfoLDP/servicebroker-plan-api/log"
-	"github.com/pkg/errors"
+	"errors"
 	"strconv"
 	"strings"
+	"fmt"
+	"reflect"
+)
+
+const (
+	KEY = "/servicebroker/"+log.ServcieBrokerName+"/catalog"
 )
 
 var etcdclient tools.EtcdClient
@@ -249,50 +255,116 @@ func PollingPlans(c *gin.Context) {
 	return
 }
 
-///seapi/services/:service_id
 func ProvisionService(c *gin.Context) {
-
-}
-
-///seapi/services/:service_id/plans/:plan_id
-func ProvisionPlan(c *gin.Context) {
-
-}
-
-func Deprovision(c *gin.Context) {
-	ins := c.Param("serviceinstance")
-	etcdC := etcdclient.GetEtcdApi()
-	req, err := etcdC.Delete(context.Background(), ins, &client.DeleteOptions{})
+	sId := c.Param("service_id")
+	key := KEY + "/" + sId
+	rBody, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		log.Logger.Error("Can not Deprovision serviceinstace from etcd", err)
-		errinfo := ErrorResponse{}
-		errinfo.Error = err.Error()
-		errinfo.Description = "can not delete serviceinstance from etcd"
-		c.JSON(http.StatusNotImplemented, errinfo)
+		c.JSON(http.StatusBadRequest,err)
 		return
 	}
-	c.JSON(http.StatusOK, req.Node)
+	defer c.Request.Body.Close()
+	var pservice CatalogResponse
+	err = json.Unmarshal(rBody,&pservice)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	etcdC := etcdclient.GetEtcdApi()
+	req := &client.Response{}
+	for i,v := range pservice.Services{
+		tagName ,value := getTag(&v,i)
+		key += "/" + tagName
+		req,err = etcdC.Update(context.Background(),key,value)
+		if err != nil{
+			log.Logger.Error("Can not ProvisionService service from etcd", err)
+			errinfo := ErrorResponse{}
+			errinfo.Error = err.Error()
+			errinfo.Description = "can not updata service from etcd"
+			c.JSON(http.StatusNotImplemented, errinfo)
+			return
+		}
+	}
+	c.JSON(http.StatusOK,req.Node)
 	return
 }
 
-func Update(c *gin.Context) {
-	ins := c.Param("serviceinstance")
+func ProvisionPlan(c *gin.Context) {
+	sId := c.Param("service_id")
+	pId := c.Param("plan_id")
+	key := KEY + "/" + sId + "/plan" + pId
 	rBody, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "metrics": err})
 		return
 	}
 	defer c.Request.Body.Close()
+	var pservice CatalogResponse
+	err = json.Unmarshal(rBody,&pservice)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
 	etcdC := etcdclient.GetEtcdApi()
-	req, err := etcdC.Update(context.Background(), ins, string(rBody))
-	if err != nil {
-		log.Logger.Error("Can not Deprovision serviceinstace from etcd", err)
+	req := &client.Response{}
+	for i,v := range pservice.Services{
+		tagName,value := getTag(&v,i)
+		key += "/" + tagName
+		req,err = etcdC.Update(context.Background(),key,value)
+		if err != nil{
+			log.Logger.Error("Can not ProvisionService service from etcd", err)
+			errinfo := ErrorResponse{}
+			errinfo.Error = err.Error()
+			errinfo.Description = "can not updata service from etcd"
+			c.JSON(http.StatusNotImplemented, errinfo)
+			return
+		}
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
+}
+
+func DeprovisionService(c *gin.Context) {
+	sId := c.Param("service_id")
+	etcdC := etcdclient.GetEtcdApi()
+	key := KEY + "/" + sId
+	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
+	if err != nil{
+		log.Logger.Error("Can not DeprovisionService service from etcd", err)
 		errinfo := ErrorResponse{}
 		errinfo.Error = err.Error()
-		errinfo.Description = "can not delete serviceinstance from etcd"
+		errinfo.Description = "can not delete service from etcd"
 		c.JSON(http.StatusNotImplemented, errinfo)
 		return
 	}
-	c.JSON(http.StatusOK, req.Node)
+	c.JSON(http.StatusOK,req.Node)
+	return
+}
+
+func DeprovisionPlan(c *gin.Context) {
+	sId := c.Param("service_id")
+	pId := c.Param("plan_id")
+	etcdC := etcdclient.GetEtcdApi()
+	key := KEY + "/" + sId + "/plan" + pId
+	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
+	if err != nil{
+		log.Logger.Error("Can not DeprovisionPlan plan from etcd", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "can not delete plan from etcd"
+		c.JSON(http.StatusNotImplemented, errinfo)
+		return
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
+}
+
+func getTag(u interface{},index int)(tag string,value string){
+	t := reflect.TypeOf(u)
+	v := reflect.ValueOf(u)
+	field := t.Elem().Field(index)
+	vName := v.Elem().FieldByName(field.Name)
+	tag = field.Tag.Get("json")
+	value = fmt.Sprintf("%v", vName.Interface())
 	return
 }
