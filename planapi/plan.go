@@ -10,7 +10,6 @@ import (
 	//"golang.org/x/net/context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"strconv"
 	"strings"
@@ -22,9 +21,6 @@ const (
 	KEY = "/servicebroker/"+log.ServcieBrokerName+"/catalog"
 )
 
-const (
-	KEY = "/servicebroker/" + log.ServcieBrokerName + "/catalog"
-)
 
 var etcdclient tools.EtcdClient
 
@@ -377,22 +373,6 @@ func ProvisionPlan(c *gin.Context) {
 
 }
 
-func DeprovisionService(c *gin.Context) {
-	sId := c.Param("service_id")
-	etcdC := etcdclient.GetEtcdApi()
-	key := KEY + "/" + sId
-	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
-	if err != nil {
-		log.Logger.Error("Can not DeprovisionService service from etcd", err)
-		errinfo := ErrorResponse{}
-		errinfo.Error = err.Error()
-		errinfo.Description = "can not delete service from etcd"
-		c.JSON(http.StatusNotImplemented, errinfo)
-		return
-	}
-	c.JSON(http.StatusOK, req.Node)
-	return
-}
 
 func UpdataService(c *gin.Context) {
 	sId := c.Param("service_id")
