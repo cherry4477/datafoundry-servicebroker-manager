@@ -9,8 +9,9 @@ import (
 	"net/http"
 	//"golang.org/x/net/context"
 	"encoding/json"
-	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"errors"
+	"fmt"
+	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"strconv"
 	"strings"
 	"fmt"
@@ -19,6 +20,10 @@ import (
 
 const (
 	KEY = "/servicebroker/"+log.ServcieBrokerName+"/catalog"
+)
+
+const (
+	KEY = "/servicebroker/" + log.ServcieBrokerName + "/catalog"
 )
 
 var etcdclient tools.EtcdClient
@@ -255,6 +260,140 @@ func PollingPlans(c *gin.Context) {
 	return
 }
 
+///seapi/services/:service_name
+func ProvisionService(c *gin.Context) {
+	service_name := c.Param("service_name")
+
+	service_id := tools.Getuuid()
+
+	_, err := etcdclient.GetEtcdApi().Set(context.Background(),
+		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id,
+		"",
+		&client.SetOptions{Dir: true})
+	if err != nil {
+		log.Logger.Error("etcdapi.Set service:"+service_name+" error", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "etcdapi.Set service:" + service_name + " error"
+		c.JSON(500, errinfo)
+		return
+	} else {
+		log.Logger.Debug("Successful create service:" + service_name + "in etcd.")
+	}
+	rBody, err := ioutil.ReadAll(c.Request.Body)
+	defer c.Request.Body.Close()
+	if err != nil {
+		log.Logger.Error("Get provision service data error", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "get provision service data error"
+		c.JSON(400, errinfo)
+		return
+	}
+	rsp := Service{}
+	err = json.Unmarshal(rBody, &rsp)
+	if err != nil {
+		log.Logger.Error("Parsing service data error", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "parsing service data error"
+		c.JSON(500, errinfo)
+		return
+	}
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/name", service_name)
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/description", rsp.Description)
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/bindable", strconv.FormatBool(rsp.Bindable))
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/planupdatable", strconv.FormatBool(rsp.PlanUpdatable))
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/tags", tools.GetTagstring(rsp.Tags))
+
+	tmpval, _ := json.Marshal(rsp.Metadata)
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/metadata", string(tmpval))
+
+	rsp.Id = service_id
+	rsp.Name = service_name
+	c.JSON(200, rsp)
+	return
+}
+
+///seapi/services/:service_id/plans/:plan_name
+func ProvisionPlan(c *gin.Context) {
+	service_id := c.Param("service_id")
+	plan_name := c.Param("plan_name")
+	plan_id := tools.Getuuid()
+	_, err := etcdclient.GetEtcdApi().Set(context.Background(),
+		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan",
+		"",
+		&client.SetOptions{Dir: true})
+	if err != nil {
+		log.Logger.Error("etcdapi.Set plan:"+plan_name+" error", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "etcdapi.Set plan:" + plan_name + " error"
+		c.JSON(500, errinfo)
+		return
+	} else {
+		log.Logger.Debug("Successful create plan:" + plan_name + "in etcd.")
+	}
+
+	rBody, err := ioutil.ReadAll(c.Request.Body)
+	defer c.Request.Body.Close()
+	if err != nil {
+		log.Logger.Error("Get provision plan data error", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "get provision plan data error"
+		c.JSON(400, errinfo)
+		return
+	}
+	rsp := Plan{}
+	err = json.Unmarshal(rBody, &rsp)
+	if err != nil {
+		log.Logger.Error("Parsing plan data error", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "parsing plan data error"
+		c.JSON(500, errinfo)
+		return
+	}
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan/"+plan_id+"/name", plan_name)
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan/"+plan_id+"/description", rsp.Description)
+
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan/"+plan_id+"/free", strconv.FormatBool(rsp.Free))
+
+	tmpval, _ := json.Marshal(rsp.Metadata)
+	etcdclient.Etcdset("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan/"+plan_id+"/metadata", string(tmpval))
+
+	rsp.Id = plan_id
+	rsp.Name = plan_name
+	c.JSON(200, rsp)
+	return
+
+}
+
+func DeprovisionService(c *gin.Context) {
+	sId := c.Param("service_id")
+	etcdC := etcdclient.GetEtcdApi()
+	key := KEY + "/" + sId
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
+	if err != nil {
+		log.Logger.Error("Can not DeprovisionService service from etcd", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "can not delete service from etcd"
+		c.JSON(http.StatusNotImplemented, errinfo)
+		return
+	}
+	c.JSON(http.StatusOK, req.Node)
+	return
+}
+
 func UpdataService(c *gin.Context) {
 	sId := c.Param("service_id")
 	key := KEY + "/" + sId
@@ -340,12 +479,12 @@ func DeprovisionService(c *gin.Context) {
 	c.JSON(http.StatusOK,req.Node)
 	return
 }
-
 func DeprovisionPlan(c *gin.Context) {
 	sId := c.Param("service_id")
 	pId := c.Param("plan_id")
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId + "/plan" + pId
+
 	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
 	if err != nil{
 		log.Logger.Error("Can not DeprovisionPlan plan from etcd", err)
@@ -368,3 +507,4 @@ func getTag(u interface{},index int)(tag string,value string){
 	value = fmt.Sprintf("%v", vName.Interface())
 	return
 }
+
