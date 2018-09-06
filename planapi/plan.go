@@ -255,7 +255,7 @@ func PollingPlans(c *gin.Context) {
 	return
 }
 
-func ProvisionService(c *gin.Context) {
+func UpdataService(c *gin.Context) {
 	sId := c.Param("service_id")
 	key := KEY + "/" + sId
 	rBody, err := ioutil.ReadAll(c.Request.Body)
@@ -289,7 +289,7 @@ func ProvisionService(c *gin.Context) {
 	return
 }
 
-func ProvisionPlan(c *gin.Context) {
+func UpdataPlan(c *gin.Context) {
 	sId := c.Param("service_id")
 	pId := c.Param("plan_id")
 	key := KEY + "/" + sId + "/plan" + pId
