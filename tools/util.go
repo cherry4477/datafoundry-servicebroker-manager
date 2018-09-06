@@ -1,12 +1,8 @@
 package tools
 
 import (
-	"crypto/md5"
-	"crypto/rand"
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
-	"io"
+	"github.com/satori/go.uuid"
 	"os"
 	"time"
 )
@@ -27,17 +23,15 @@ func GetTimeNow() string {
 	return time.Now().Format("2006-01-02 15:04:05.00")
 }
 
-func Getguid() string {
-	b := make([]byte, 48)
-
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return ""
-	}
-	return getmd5string(base64.URLEncoding.EncodeToString(b))
+func Getuuid() string {
+	uuid, _ := uuid.NewV4()
+	return uuid.String()
 }
 
-func getmd5string(s string) string {
-	h := md5.New()
-	h.Write([]byte(s))
-	return hex.EncodeToString(h.Sum(nil))
+func GetTagstring(tags []string) string {
+	rst := ""
+	for i := 0; i < len(tags); i++ {
+		rst += (tags[i] + ",")
+	}
+	return rst[:len(rst)-2]
 }
