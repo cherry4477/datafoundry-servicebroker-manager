@@ -33,5 +33,5 @@ func GetTagstring(tags []string) string {
 	for i := 0; i < len(tags); i++ {
 		rst += (tags[i] + ",")
 	}
-	return rst[:len(rst)-2]
+	return rst[:len(rst)-1]
 }
