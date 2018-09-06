@@ -50,8 +50,8 @@ func handle() (router *gin.Engine) {
 	router.GET("/seapi/services/:service_id", planapi.PollingService)
 	router.GET("/seapi/services/:service_id/plans/:plan_id", planapi.PollingPlan)
 	router.GET("/seapi/services/:service_id/plans", planapi.PollingPlans)
-	router.POST("/seapi/services/:service_name", planapi.ProvisionService)
-	router.POST("/seapi/services/:service_id/plans/:plan_name", planapi.ProvisionPlan)
+	router.POST("/seapi/services/:service_id", planapi.ProvisionService)
+	router.POST("/seapi/services/:service_id/plans/:plan_id", planapi.ProvisionPlan)
 
 	router.PUT("/seapi/services/:service_id", planapi.UpdataService)
 	router.PUT("/seapi/services/:service_id/plans/:plan_id", planapi.UpdataPlan)

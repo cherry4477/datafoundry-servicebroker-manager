@@ -10,17 +10,16 @@ import (
 	//"golang.org/x/net/context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/asiainfoLDP/servicebroker-plan-api/log"
+	"reflect"
 	"strconv"
 	"strings"
-	"fmt"
-	"reflect"
 )
 
 const (
-	KEY = "/servicebroker/"+log.ServcieBrokerName+"/catalog"
+	KEY = "/servicebroker/" + log.ServcieBrokerName + "/catalog"
 )
-
 
 var etcdclient tools.EtcdClient
 
@@ -128,19 +127,19 @@ func PollingService(c *gin.Context) {
 	myService := Service{}
 	for i := 0; i < len(resp.Node.Nodes); i++ {
 
-		lowerkey := strings.ToLower(resp.Node.Nodes[i].Key)
-		switch lowerkey {
-		case "name":
+		lowerkey := strings.ToLower(resp.Node.Key)
+		switch strings.ToLower(resp.Node.Nodes[i].Key) {
+		case lowerkey + "/name":
 			myService.Name = resp.Node.Nodes[i].Value
-		case "description":
+		case lowerkey + "/description":
 			myService.Description = resp.Node.Nodes[i].Value
-		case "bindable":
+		case lowerkey + "/bindable":
 			myService.Bindable, _ = strconv.ParseBool(resp.Node.Nodes[i].Value)
-		case "tags":
+		case lowerkey + "/tags":
 			myService.Tags = strings.Split(resp.Node.Nodes[i].Value, ",")
-		case "planupdatable":
+		case lowerkey + "/planupdatable":
 			myService.PlanUpdatable, _ = strconv.ParseBool(resp.Node.Nodes[i].Value)
-		case "metadata":
+		case lowerkey + "/metadata":
 			json.Unmarshal([]byte(resp.Node.Nodes[i].Value), &myService.Metadata)
 		}
 	}
@@ -258,7 +257,7 @@ func PollingPlans(c *gin.Context) {
 
 ///seapi/services/:service_name
 func ProvisionService(c *gin.Context) {
-	service_name := c.Param("service_name")
+	service_name := c.Param("service_id")
 
 	service_id := tools.Getuuid()
 
@@ -319,7 +318,7 @@ func ProvisionService(c *gin.Context) {
 ///seapi/services/:service_id/plans/:plan_name
 func ProvisionPlan(c *gin.Context) {
 	service_id := c.Param("service_id")
-	plan_name := c.Param("plan_name")
+	plan_name := c.Param("plan_id")
 	plan_id := tools.Getuuid()
 	_, err := etcdclient.GetEtcdApi().Set(context.Background(),
 		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan",
@@ -373,29 +372,28 @@ func ProvisionPlan(c *gin.Context) {
 
 }
 
-
 func UpdataService(c *gin.Context) {
 	sId := c.Param("service_id")
 	key := KEY + "/" + sId
 	rBody, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,err)
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	defer c.Request.Body.Close()
 	var pservice CatalogResponse
-	err = json.Unmarshal(rBody,&pservice)
-	if err != nil{
+	err = json.Unmarshal(rBody, &pservice)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for i,v := range pservice.Services{
-		tagName ,value := getTag(&v,i)
+	for i, v := range pservice.Services {
+		tagName, value := getTag(&v, i)
 		key += "/" + tagName
-		req,err = etcdC.Update(context.Background(),key,value)
-		if err != nil{
+		req, err = etcdC.Update(context.Background(), key, value)
+		if err != nil {
 			log.Logger.Error("Can not ProvisionService service from etcd", err)
 			errinfo := ErrorResponse{}
 			errinfo.Error = err.Error()
@@ -404,7 +402,7 @@ func UpdataService(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK,req.Node)
+	c.JSON(http.StatusOK, req.Node)
 	return
 }
 
@@ -419,18 +417,18 @@ func UpdataPlan(c *gin.Context) {
 	}
 	defer c.Request.Body.Close()
 	var pservice PlansResponse
-	err = json.Unmarshal(rBody,&pservice)
-	if err != nil{
+	err = json.Unmarshal(rBody, &pservice)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for i,v := range pservice.Plans{
-		tagName,value := getTag(&v,i)
+	for i, v := range pservice.Plans {
+		tagName, value := getTag(&v, i)
 		key += "/" + tagName
-		req,err = etcdC.Update(context.Background(),key,value)
-		if err != nil{
+		req, err = etcdC.Update(context.Background(), key, value)
+		if err != nil {
 			log.Logger.Error("Can not ProvisionService service from etcd", err)
 			errinfo := ErrorResponse{}
 			errinfo.Error = err.Error()
@@ -439,7 +437,7 @@ func UpdataPlan(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK,req.Node)
+	c.JSON(http.StatusOK, req.Node)
 	return
 }
 
@@ -447,8 +445,8 @@ func DeprovisionService(c *gin.Context) {
 	sId := c.Param("service_id")
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId
-	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
-	if err != nil{
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
+	if err != nil {
 		log.Logger.Error("Can not DeprovisionService service from etcd", err)
 		errinfo := ErrorResponse{}
 		errinfo.Error = err.Error()
@@ -456,7 +454,7 @@ func DeprovisionService(c *gin.Context) {
 		c.JSON(http.StatusNotImplemented, errinfo)
 		return
 	}
-	c.JSON(http.StatusOK,req.Node)
+	c.JSON(http.StatusOK, req.Node)
 	return
 }
 func DeprovisionPlan(c *gin.Context) {
@@ -465,8 +463,8 @@ func DeprovisionPlan(c *gin.Context) {
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId + "/plan" + pId
 
-	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
-	if err != nil{
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
+	if err != nil {
 		log.Logger.Error("Can not DeprovisionPlan plan from etcd", err)
 		errinfo := ErrorResponse{}
 		errinfo.Error = err.Error()
@@ -474,11 +472,11 @@ func DeprovisionPlan(c *gin.Context) {
 		c.JSON(http.StatusNotImplemented, errinfo)
 		return
 	}
-	c.JSON(http.StatusOK,req.Node)
+	c.JSON(http.StatusOK, req.Node)
 	return
 }
 
-func getTag(u interface{},index int)(tag string,value string){
+func getTag(u interface{}, index int) (tag string, value string) {
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(u)
 	field := t.Elem().Field(index)
@@ -487,4 +485,3 @@ func getTag(u interface{},index int)(tag string,value string){
 	value = fmt.Sprintf("%v", vName.Interface())
 	return
 }
-
