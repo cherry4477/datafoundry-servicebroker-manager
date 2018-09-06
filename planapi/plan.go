@@ -382,7 +382,7 @@ func UpdataService(c *gin.Context) {
 		return
 	}
 	defer c.Request.Body.Close()
-	var pservice CatalogResponse
+	var pservice Service
 	err = json.Unmarshal(rBody, &pservice)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
@@ -390,19 +390,17 @@ func UpdataService(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for _, v := range pservice.Services {
-		mValue := getTag(&v)
-		for mk,mv := range mValue{
-			key += "/" + mk
-			req,err = etcdC.Update(context.Background(),key,mv)
-			if err != nil{
-				log.Logger.Error("Can not UpdataService service from etcd", err)
-				errinfo := ErrorResponse{}
-				errinfo.Error = err.Error()
-				errinfo.Description = "can not updata service from etcd"
-				c.JSON(http.StatusNotImplemented, errinfo)
-				return
-			}
+	mValue := getTag(&pservice)
+	for mk, mv := range mValue {
+		key += "/" + mk
+		req, err = etcdC.Update(context.Background(), key, mv)
+		if err != nil {
+			log.Logger.Error("Can not UpdataService service from etcd", err)
+			errinfo := ErrorResponse{}
+			errinfo.Error = err.Error()
+			errinfo.Description = "can not updata service from etcd"
+			c.JSON(http.StatusNotImplemented, errinfo)
+			return
 		}
 	}
 	c.JSON(http.StatusOK, req.Node)
@@ -419,27 +417,25 @@ func UpdataPlan(c *gin.Context) {
 		return
 	}
 	defer c.Request.Body.Close()
-	var pservice PlansResponse
-	err = json.Unmarshal(rBody, &pservice)
+	var plans Plan
+	err = json.Unmarshal(rBody, &plans)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for _, v := range pservice.Plans {
-		mValue := getTag(&v)
-		for mk,mv := range mValue{
-			key += "/" + mk
-			req,err = etcdC.Update(context.Background(),key,mv)
-			if err != nil{
-				log.Logger.Error("Can not UpdataPlan service from etcd", err)
-				errinfo := ErrorResponse{}
-				errinfo.Error = err.Error()
-				errinfo.Description = "can not updata service from etcd"
-				c.JSON(http.StatusNotImplemented, errinfo)
-				return
-			}
+	mValue := getTag(&plans)
+	for mk, mv := range mValue {
+		key += "/" + mk
+		req, err = etcdC.Update(context.Background(), key, mv)
+		if err != nil {
+			log.Logger.Error("Can not UpdataPlan service from etcd", err)
+			errinfo := ErrorResponse{}
+			errinfo.Error = err.Error()
+			errinfo.Description = "can not updata service from etcd"
+			c.JSON(http.StatusNotImplemented, errinfo)
+			return
 		}
 	}
 	c.JSON(http.StatusOK, req.Node)
