@@ -8,3 +8,7 @@ type ErrorResponse struct {
 type CatalogResponse struct {
 	Services []Service `json:"services"`
 }
+
+type PlansResponse struct {
+	Plans []Plan `json:"plans"`
+}
