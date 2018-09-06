@@ -392,10 +392,10 @@ func UpdataService(c *gin.Context) {
 	req := &client.Response{}
 	for _, v := range pservice.Services {
 		mValue := getTag(&v)
-		for k, v := range mValue {
-			key += "/" + k
-			req, err = etcdC.Update(context.Background(), key, v)
-			if err != nil {
+		for mk,mv := range mValue{
+			key += "/" + mk
+			req,err = etcdC.Update(context.Background(),key,mv)
+			if err != nil{
 				log.Logger.Error("Can not UpdataService service from etcd", err)
 				errinfo := ErrorResponse{}
 				errinfo.Error = err.Error()
@@ -429,10 +429,10 @@ func UpdataPlan(c *gin.Context) {
 	req := &client.Response{}
 	for _, v := range pservice.Plans {
 		mValue := getTag(&v)
-		for k, v := range mValue {
-			key += "/" + k
-			req, err = etcdC.Update(context.Background(), key, v)
-			if err != nil {
+		for mk,mv := range mValue{
+			key += "/" + mk
+			req,err = etcdC.Update(context.Background(),key,mv)
+			if err != nil{
 				log.Logger.Error("Can not UpdataPlan service from etcd", err)
 				errinfo := ErrorResponse{}
 				errinfo.Error = err.Error()
