@@ -138,12 +138,13 @@ func PollingService(c *gin.Context) {
 		case lowerkey + "/tags":
 			myService.Tags = strings.Split(resp.Node.Nodes[i].Value, ",")
 		case lowerkey + "/planupdatable":
+			println("planupdatable:" + resp.Node.Nodes[i].Value)
 			myService.PlanUpdatable, _ = strconv.ParseBool(resp.Node.Nodes[i].Value)
 		case lowerkey + "/metadata":
 			json.Unmarshal([]byte(resp.Node.Nodes[i].Value), &myService.Metadata)
 		}
 	}
-
+	myService.Id = service_id
 	c.JSON(200, myService)
 }
 
@@ -182,18 +183,19 @@ func PollingPlan(c *gin.Context) {
 	myPlan := Plan{}
 	for i := 0; i < len(resp.Node.Nodes); i++ {
 
-		lowerkey := strings.ToLower(resp.Node.Nodes[i].Key)
-		switch lowerkey {
-		case "name":
+		lowerkey := strings.ToLower(resp.Node.Key)
+		switch strings.ToLower(resp.Node.Nodes[i].Key) {
+		case lowerkey + "/name":
 			myPlan.Name = resp.Node.Nodes[i].Value
-		case "description":
+		case lowerkey + "/description":
 			myPlan.Description = resp.Node.Nodes[i].Value
-		case "metadata":
+		case lowerkey + "/metadata":
 			json.Unmarshal([]byte(resp.Node.Nodes[i].Value), &myPlan.Metadata)
-		case "free":
+		case lowerkey + "/free":
 			myPlan.Free, _ = strconv.ParseBool(resp.Node.Nodes[i].Value)
 		}
 	}
+	myPlan.Id = plan_id
 
 	c.JSON(200, myPlan)
 }
@@ -236,16 +238,15 @@ func PollingPlans(c *gin.Context) {
 		myPlan := Plan{}
 		myPlan.Id = strings.Split(resp.Node.Nodes[i].Key, "/")[len(strings.Split(resp.Node.Nodes[i].Key, "/"))-1]
 		for j := 0; j < len(resp.Node.Nodes[i].Nodes); j++ {
-			lowernodekey := strings.ToLower(resp.Node.Nodes[i].Nodes[j].Key)
-			switch lowernodekey {
-			case "name":
+			lowernodekey := strings.ToLower(resp.Node.Nodes[i].Key)
+			switch strings.ToLower(resp.Node.Nodes[i].Nodes[j].Key) {
+			case lowernodekey + "/name":
 				myPlan.Name = resp.Node.Nodes[i].Nodes[j].Value
-			case "description":
+			case lowernodekey + "/description":
 				myPlan.Description = resp.Node.Nodes[i].Nodes[j].Value
-			case "free":
-				myPlanfree, _ := strconv.ParseBool(resp.Node.Nodes[i].Nodes[j].Value)
-				myPlan.Free = myPlanfree
-			case "metadata":
+			case lowernodekey + "/free":
+				myPlan.Free, _ = strconv.ParseBool(resp.Node.Nodes[i].Nodes[j].Value)
+			case lowernodekey + "/metadata":
 				json.Unmarshal([]byte(resp.Node.Nodes[i].Nodes[j].Value), &myPlan.Metadata)
 			}
 		}
@@ -389,12 +390,12 @@ func UpdataService(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for _,v := range pservice.Services{
+	for _, v := range pservice.Services {
 		mValue := getTag(&v)
-		for k,v := range mValue{
+		for k, v := range mValue {
 			key += "/" + k
-			req,err = etcdC.Update(context.Background(),key,v)
-			if err != nil{
+			req, err = etcdC.Update(context.Background(), key, v)
+			if err != nil {
 				log.Logger.Error("Can not UpdataService service from etcd", err)
 				errinfo := ErrorResponse{}
 				errinfo.Error = err.Error()
@@ -426,12 +427,12 @@ func UpdataPlan(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for _,v := range pservice.Plans{
+	for _, v := range pservice.Plans {
 		mValue := getTag(&v)
-		for k,v := range mValue{
+		for k, v := range mValue {
 			key += "/" + k
-			req,err = etcdC.Update(context.Background(),key,v)
-			if err != nil{
+			req, err = etcdC.Update(context.Background(), key, v)
+			if err != nil {
 				log.Logger.Error("Can not UpdataPlan service from etcd", err)
 				errinfo := ErrorResponse{}
 				errinfo.Error = err.Error()
@@ -480,11 +481,11 @@ func DeprovisionPlan(c *gin.Context) {
 	return
 }
 
-func getTag(u interface{})(value map[string]string){
+func getTag(u interface{}) (value map[string]string) {
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(u)
 	value = make(map[string]string)
-	for i := 0; i < t.Elem().NumField();i++{
+	for i := 0; i < t.Elem().NumField(); i++ {
 		field := t.Elem().Field(i)
 		vName := v.Elem().FieldByName(field.Name)
 		val := fmt.Sprintf("%v", vName.Interface())

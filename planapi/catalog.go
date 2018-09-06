@@ -4,12 +4,12 @@ type Service struct {
 	Name             string           `json:"name"`
 	Id               string           `json:"id"`
 	Description      string           `json:"description"`
-	Tags             []string         `json:"tags,omitempty"`
+	Tags             []string         `json:"tags"`
 	Requires         []string         `json:"requires,omitempty"`
 	Bindable         bool             `json:"bindable"`
-	Metadata         interface{}      `json:"metadata,omitempty"`
+	Metadata         interface{}      `json:"metadata"`
 	Dashboard_client *DashboardClient `json:"dashboard_client,omitempty"`
-	PlanUpdatable    bool             `json:"plan_updateable,omitempty"`
+	PlanUpdatable    bool             `json:"plan_updateable"`
 	Plans            []Plan           `json:"plans"`
 }
 
