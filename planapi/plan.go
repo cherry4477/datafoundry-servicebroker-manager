@@ -299,7 +299,7 @@ func ProvisionPlan(c *gin.Context) {
 		return
 	}
 	defer c.Request.Body.Close()
-	var pservice CatalogResponse
+	var pservice PlansResponse
 	err = json.Unmarshal(rBody,&pservice)
 	if err != nil{
 		c.JSON(http.StatusBadRequest, err)
@@ -307,7 +307,7 @@ func ProvisionPlan(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for i,v := range pservice.Services{
+	for i,v := range pservice.Plans{
 		tagName,value := getTag(&v,i)
 		key += "/" + tagName
 		req,err = etcdC.Update(context.Background(),key,value)
