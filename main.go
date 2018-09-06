@@ -53,8 +53,8 @@ func handle() (router *gin.Engine) {
 	router.POST("/seapi/services/:service_name", planapi.ProvisionService)
 	router.POST("/seapi/services/:service_id/plans/:plan_name", planapi.ProvisionPlan)
 
-	router.PUT("/seapi/services/:service_id", planapi.UpdateService)
-	router.PUT("/seapi/services/:service_id/plans/:plan_id", planapi.UpdatePlan)
+	router.PUT("/seapi/services/:service_id", planapi.UpdataService)
+	router.PUT("/seapi/services/:service_id/plans/:plan_id", planapi.UpdataPlan)
 	router.DELETE("/seapi/services/:service_id", planapi.DeprovisionService)
 	router.DELETE("/seapi/services/:service_id/plans/:plan_id", planapi.DeprovisionPlan)
 

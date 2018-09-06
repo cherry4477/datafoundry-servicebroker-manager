@@ -12,9 +12,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/asiainfoLDP/servicebroker-plan-api/log"
-	"reflect"
 	"strconv"
 	"strings"
+	"fmt"
+	"reflect"
+)
+
+const (
+	KEY = "/servicebroker/"+log.ServcieBrokerName+"/catalog"
 )
 
 const (
@@ -372,75 +377,6 @@ func ProvisionPlan(c *gin.Context) {
 
 }
 
-func UpdateService(c *gin.Context) {
-	sId := c.Param("service_id")
-	key := KEY + "/" + sId
-	rBody, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-	defer c.Request.Body.Close()
-	var pservice CatalogResponse
-	err = json.Unmarshal(rBody, &pservice)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-	etcdC := etcdclient.GetEtcdApi()
-	req := &client.Response{}
-	for i, v := range pservice.Services {
-		tagName, value := getTag(&v, i)
-		key += "/" + tagName
-		req, err = etcdC.Update(context.Background(), key, value)
-		if err != nil {
-			log.Logger.Error("Can not ProvisionService service from etcd", err)
-			errinfo := ErrorResponse{}
-			errinfo.Error = err.Error()
-			errinfo.Description = "can not updata service from etcd"
-			c.JSON(http.StatusNotImplemented, errinfo)
-			return
-		}
-	}
-	c.JSON(http.StatusOK, req.Node)
-	return
-}
-
-func UpdatePlan(c *gin.Context) {
-	sId := c.Param("service_id")
-	pId := c.Param("plan_id")
-	key := KEY + "/" + sId + "/plan" + pId
-	rBody, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "metrics": err})
-		return
-	}
-	defer c.Request.Body.Close()
-	var pservice CatalogResponse
-	err = json.Unmarshal(rBody, &pservice)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-	etcdC := etcdclient.GetEtcdApi()
-	req := &client.Response{}
-	for i, v := range pservice.Services {
-		tagName, value := getTag(&v, i)
-		key += "/" + tagName
-		req, err = etcdC.Update(context.Background(), key, value)
-		if err != nil {
-			log.Logger.Error("Can not ProvisionService service from etcd", err)
-			errinfo := ErrorResponse{}
-			errinfo.Error = err.Error()
-			errinfo.Description = "can not updata service from etcd"
-			c.JSON(http.StatusNotImplemented, errinfo)
-			return
-		}
-	}
-	c.JSON(http.StatusOK, req.Node)
-	return
-}
-
 func DeprovisionService(c *gin.Context) {
 	sId := c.Param("service_id")
 	etcdC := etcdclient.GetEtcdApi()
@@ -458,13 +394,99 @@ func DeprovisionService(c *gin.Context) {
 	return
 }
 
+func UpdataService(c *gin.Context) {
+	sId := c.Param("service_id")
+	key := KEY + "/" + sId
+	rBody, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest,err)
+		return
+	}
+	defer c.Request.Body.Close()
+	var pservice CatalogResponse
+	err = json.Unmarshal(rBody,&pservice)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	etcdC := etcdclient.GetEtcdApi()
+	req := &client.Response{}
+	for i,v := range pservice.Services{
+		tagName ,value := getTag(&v,i)
+		key += "/" + tagName
+		req,err = etcdC.Update(context.Background(),key,value)
+		if err != nil{
+			log.Logger.Error("Can not ProvisionService service from etcd", err)
+			errinfo := ErrorResponse{}
+			errinfo.Error = err.Error()
+			errinfo.Description = "can not updata service from etcd"
+			c.JSON(http.StatusNotImplemented, errinfo)
+			return
+		}
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
+}
+
+func UpdataPlan(c *gin.Context) {
+	sId := c.Param("service_id")
+	pId := c.Param("plan_id")
+	key := KEY + "/" + sId + "/plan" + pId
+	rBody, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "metrics": err})
+		return
+	}
+	defer c.Request.Body.Close()
+	var pservice PlansResponse
+	err = json.Unmarshal(rBody,&pservice)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	etcdC := etcdclient.GetEtcdApi()
+	req := &client.Response{}
+	for i,v := range pservice.Plans{
+		tagName,value := getTag(&v,i)
+		key += "/" + tagName
+		req,err = etcdC.Update(context.Background(),key,value)
+		if err != nil{
+			log.Logger.Error("Can not ProvisionService service from etcd", err)
+			errinfo := ErrorResponse{}
+			errinfo.Error = err.Error()
+			errinfo.Description = "can not updata service from etcd"
+			c.JSON(http.StatusNotImplemented, errinfo)
+			return
+		}
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
+}
+
+func DeprovisionService(c *gin.Context) {
+	sId := c.Param("service_id")
+	etcdC := etcdclient.GetEtcdApi()
+	key := KEY + "/" + sId
+	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
+	if err != nil{
+		log.Logger.Error("Can not DeprovisionService service from etcd", err)
+		errinfo := ErrorResponse{}
+		errinfo.Error = err.Error()
+		errinfo.Description = "can not delete service from etcd"
+		c.JSON(http.StatusNotImplemented, errinfo)
+		return
+	}
+	c.JSON(http.StatusOK,req.Node)
+	return
+}
 func DeprovisionPlan(c *gin.Context) {
 	sId := c.Param("service_id")
 	pId := c.Param("plan_id")
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId + "/plan" + pId
-	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
-	if err != nil {
+
+	req,err := etcdC.Delete(context.Background(),key,&client.DeleteOptions{})
+	if err != nil{
 		log.Logger.Error("Can not DeprovisionPlan plan from etcd", err)
 		errinfo := ErrorResponse{}
 		errinfo.Error = err.Error()
@@ -472,11 +494,11 @@ func DeprovisionPlan(c *gin.Context) {
 		c.JSON(http.StatusNotImplemented, errinfo)
 		return
 	}
-	c.JSON(http.StatusOK, req.Node)
+	c.JSON(http.StatusOK,req.Node)
 	return
 }
 
-func getTag(u interface{}, index int) (tag string, value string) {
+func getTag(u interface{},index int)(tag string,value string){
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(u)
 	field := t.Elem().Field(index)
@@ -485,3 +507,4 @@ func getTag(u interface{}, index int) (tag string, value string) {
 	value = fmt.Sprintf("%v", vName.Interface())
 	return
 }
+
