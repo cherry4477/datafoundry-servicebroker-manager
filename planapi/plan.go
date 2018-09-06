@@ -391,17 +391,19 @@ func UpdataService(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for i,v := range pservice.Services{
-		tagName ,value := getTag(&v,i)
-		key += "/" + tagName
-		req,err = etcdC.Update(context.Background(),key,value)
-		if err != nil{
-			log.Logger.Error("Can not ProvisionService service from etcd", err)
-			errinfo := ErrorResponse{}
-			errinfo.Error = err.Error()
-			errinfo.Description = "can not updata service from etcd"
-			c.JSON(http.StatusNotImplemented, errinfo)
-			return
+	for _,v := range pservice.Services{
+		mValue := getTag(&v)
+		for k,v := range mValue{
+			key += "/" + k
+			req,err = etcdC.Update(context.Background(),key,v)
+			if err != nil{
+				log.Logger.Error("Can not UpdataService service from etcd", err)
+				errinfo := ErrorResponse{}
+				errinfo.Error = err.Error()
+				errinfo.Description = "can not updata service from etcd"
+				c.JSON(http.StatusNotImplemented, errinfo)
+				return
+			}
 		}
 	}
 	c.JSON(http.StatusOK,req.Node)
@@ -426,17 +428,19 @@ func UpdataPlan(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	for i,v := range pservice.Plans{
-		tagName,value := getTag(&v,i)
-		key += "/" + tagName
-		req,err = etcdC.Update(context.Background(),key,value)
-		if err != nil{
-			log.Logger.Error("Can not ProvisionService service from etcd", err)
-			errinfo := ErrorResponse{}
-			errinfo.Error = err.Error()
-			errinfo.Description = "can not updata service from etcd"
-			c.JSON(http.StatusNotImplemented, errinfo)
-			return
+	for _,v := range pservice.Plans{
+		mValue := getTag(&v)
+		for k,v := range mValue{
+			key += "/" + k
+			req,err = etcdC.Update(context.Background(),key,v)
+			if err != nil{
+				log.Logger.Error("Can not UpdataPlan service from etcd", err)
+				errinfo := ErrorResponse{}
+				errinfo.Error = err.Error()
+				errinfo.Description = "can not updata service from etcd"
+				c.JSON(http.StatusNotImplemented, errinfo)
+				return
+			}
 		}
 	}
 	c.JSON(http.StatusOK,req.Node)
@@ -478,13 +482,17 @@ func DeprovisionPlan(c *gin.Context) {
 	return
 }
 
-func getTag(u interface{},index int)(tag string,value string){
+func getTag(u interface{})(value map[string]string){
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(u)
-	field := t.Elem().Field(index)
-	vName := v.Elem().FieldByName(field.Name)
-	tag = field.Tag.Get("json")
-	value = fmt.Sprintf("%v", vName.Interface())
+	value = make(map[string]string)
+	for i := 0; i < t.Elem().NumField();i++{
+		field := t.Elem().Field(i)
+		vName := v.Elem().FieldByName(field.Name)
+		val := fmt.Sprintf("%v", vName.Interface())
+		tag := field.Tag.Get("json")
+		value[tag] = val
+	}
 	return
 }
 
