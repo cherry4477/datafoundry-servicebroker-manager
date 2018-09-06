@@ -486,7 +486,9 @@ func getTag(u interface{}) (value map[string]string) {
 		vName := v.Elem().FieldByName(field.Name)
 		val := fmt.Sprintf("%v", vName.Interface())
 		tag := field.Tag.Get("json")
-		value[tag] = val
+		if val != ""{
+			value[tag] = val
+		}
 	}
 	return
 }
