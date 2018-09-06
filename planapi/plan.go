@@ -392,8 +392,8 @@ func UpdataService(c *gin.Context) {
 	req := &client.Response{}
 	mValue := getTag(&pservice)
 	for mk, mv := range mValue {
-		key += "/" + mk
-		req, err = etcdC.Update(context.Background(), key, mv)
+		mkey := key + "/" + mk
+		req, err = etcdC.Update(context.Background(), mkey, mv)
 		if err != nil {
 			log.Logger.Error("Can not UpdataService service from etcd", err)
 			errinfo := ErrorResponse{}
@@ -427,8 +427,8 @@ func UpdataPlan(c *gin.Context) {
 	req := &client.Response{}
 	mValue := getTag(&plans)
 	for mk, mv := range mValue {
-		key += "/" + mk
-		req, err = etcdC.Update(context.Background(), key, mv)
+		mkey := key + "/" + mk
+		req, err = etcdC.Update(context.Background(), mkey, mv)
 		if err != nil {
 			log.Logger.Error("Can not UpdataPlan service from etcd", err)
 			errinfo := ErrorResponse{}
@@ -484,10 +484,43 @@ func getTag(u interface{}) (value map[string]string) {
 	for i := 0; i < t.Elem().NumField(); i++ {
 		field := t.Elem().Field(i)
 		vName := v.Elem().FieldByName(field.Name)
-		val := fmt.Sprintf("%v", vName.Interface())
-		tag := field.Tag.Get("json")
-		if val != ""{
-			value[tag] = val
+		kind := v.Elem().FieldByName(field.Name).Kind()
+		switch kind {
+		case reflect.Ptr:
+			{
+				val := vName.Pointer()
+				if val != 0 {
+					val := fmt.Sprintf("%v", vName.Interface())
+					tag := field.Tag.Get("bson")
+					value[tag] = val
+				}
+			}
+			//TODO: interface 重新转换
+		case reflect.Interface:
+			{
+				var met interface{}
+				val := fmt.Sprintf("%v", vName.Interface())
+				json.Unmarshal([]byte(val),&met)
+				strJ,_ := json.Marshal(met)
+				tag := field.Tag.Get("bson")
+				fmt.Println("--- strJ is  ",string(strJ))
+				value[tag] = string(strJ)
+			}
+		case reflect.Bool:
+			{
+				val := fmt.Sprintf("%v", vName.Interface())
+				tag := field.Tag.Get("bson")
+				value[tag] = val
+			}
+		default:
+			{
+				if vName.Len() > 0 {
+					val := fmt.Sprintf("%v", vName.Interface())
+					tag := field.Tag.Get("bson")
+					value[tag] = val
+				}
+			}
+
 		}
 	}
 	return
