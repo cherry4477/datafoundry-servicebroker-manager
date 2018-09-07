@@ -11,11 +11,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/asiainfoLDP/datafactory/Godeps/_workspace/src/k8s.io/kubernetes/third_party/golang/go/doc/testdata"
 	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"reflect"
 	"strconv"
 	"strings"
-	"github.com/asiainfoLDP/datafactory/Godeps/_workspace/src/k8s.io/kubernetes/third_party/golang/go/doc/testdata"
 )
 
 const (
@@ -257,18 +257,18 @@ func PollingPlans(c *gin.Context) {
 	return
 }
 
-func checkName(path,name string) bool {
+func checkName(path, name string) bool {
 	resp, _ := etcdclient.GetEtcdApi().Get(context.Background(),
 		path,
 		&client.GetOptions{Recursive: true})
 	for i := 0; i < len(resp.Node.Nodes); i++ {
 		for j := 0; j < len(resp.Node.Nodes[i].Nodes); j++ {
-			lowerkey := strings.ToLower(resp.Node.Nodes[i].Key)+"/name"
+			lowerkey := strings.ToLower(resp.Node.Nodes[i].Key) + "/name"
 			if lowerkey == strings.ToLower(resp.Node.Nodes[i].Nodes[j].Key) {
-				if name ==resp.Node.Nodes[i].Nodes[j].Value{
+				if name == resp.Node.Nodes[i].Nodes[j].Value {
 					return true
 				}
-			}else{
+			} else {
 				continue
 			}
 		}
@@ -280,11 +280,11 @@ func checkName(path,name string) bool {
 func ProvisionService(c *gin.Context) {
 	service_name := c.Param("service_id")
 
-	if checkName("/servicebroker/"+log.ServcieBrokerName+"/catalog",service_name){
-		log.Logger.Debug("Service name:"+service_name+" conflict")
+	if checkName("/servicebroker/"+log.ServcieBrokerName+"/catalog", service_name) {
+		log.Logger.Debug("Service name:" + service_name + " conflict")
 		errinfo := ErrorResponse{}
-		errinfo.Error = errors.New("service name:"+service_name+" conflict").Error()
-		errinfo.Description = "service name:"+service_name+" conflict"
+		errinfo.Error = errors.New("service name:" + service_name + " conflict").Error()
+		errinfo.Description = "service name:" + service_name + " conflict"
 		c.JSON(409, errinfo)
 		return
 	}
@@ -350,11 +350,11 @@ func ProvisionPlan(c *gin.Context) {
 	service_id := c.Param("service_id")
 	plan_name := c.Param("plan_id")
 
-	if checkName("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan",plan_name){
-		log.Logger.Debug("Plan name:"+plan_name+" conflict in the service:"+service_id)
+	if checkName("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan", plan_name) {
+		log.Logger.Debug("Plan name:" + plan_name + " conflict in the service:" + service_id)
 		errinfo := ErrorResponse{}
 		errinfo.Error = errors.New("plan name conflict in the service").Error()
-		errinfo.Description = "plan name:"+plan_name+" conflict in the service:"+service_id
+		errinfo.Description = "plan name:" + plan_name + " conflict in the service:" + service_id
 		c.JSON(409, errinfo)
 		return
 	}
@@ -429,8 +429,8 @@ func UpdataService(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	mValue,err := getTag(&pservice)
-	if err != nil{
+	mValue, err := getTag(&pservice)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
@@ -468,9 +468,9 @@ func UpdataPlan(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	mValue,err := getTag(&plans)
-	if err != nil{
-		c.JSON(http.StatusBadRequest,err)
+	mValue, err := getTag(&plans)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	for mk, mv := range mValue {
@@ -524,7 +524,7 @@ func DeprovisionPlan(c *gin.Context) {
 	return
 }
 
-func getTag(u interface{}) (value map[string]string,err error) {
+func getTag(u interface{}) (value map[string]string, err error) {
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(u)
 	value = make(map[string]string)
@@ -545,10 +545,10 @@ func getTag(u interface{}) (value map[string]string,err error) {
 		case reflect.Interface:
 			{
 				tag := field.Tag.Get("bson")
-				strJ,err := json.Marshal(vName.Interface())
-				if err != nil{
+				strJ, err := json.Marshal(vName.Interface())
+				if err != nil {
 					log.Logger.Error("json Marshal error ", err)
-					return nil,err
+					return nil, err
 				}
 				value[tag] = string(strJ)
 			}
