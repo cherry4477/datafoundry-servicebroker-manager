@@ -451,7 +451,7 @@ func UpdataService(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK, mValue)
+	c.JSON(http.StatusOK, pservice)
 	return
 }
 
@@ -497,7 +497,7 @@ func UpdataPlan(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK, mValue)
+	c.JSON(http.StatusOK, plans)
 	return
 }
 
