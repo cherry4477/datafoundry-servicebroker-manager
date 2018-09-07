@@ -2,17 +2,15 @@ package planapi
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"github.com/asiainfoLDP/servicebroker-plan-api/tools"
 	"github.com/coreos/etcd/client"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
-	//"golang.org/x/net/context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/asiainfoLDP/datafactory/Godeps/_workspace/src/k8s.io/kubernetes/third_party/golang/go/doc/testdata"
-	"github.com/asiainfoLDP/servicebroker-plan-api/log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -493,7 +491,7 @@ func DeprovisionService(c *gin.Context) {
 	sId := c.Param("service_id")
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId
-	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{Recursive:true,Dir:true})
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{Recursive: true, Dir: true})
 	if err != nil {
 		log.Logger.Error("Can not DeprovisionService service from etcd", err)
 		errinfo := ErrorResponse{}
@@ -511,7 +509,7 @@ func DeprovisionPlan(c *gin.Context) {
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId + "/plan/" + pId
 
-	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{Recursive:true,Dir:true})
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{Recursive: true, Dir: true})
 	if err != nil {
 		log.Logger.Error("Can not DeprovisionPlan plan from etcd", err)
 		errinfo := ErrorResponse{}

@@ -20,7 +20,7 @@ type Plan struct {
 	Metadata    interface{} `json:"metadata,omitempty" bson:"metadata"`
 	Free        bool        `json:"free" bson:"free"`
 	//Bindable    bool        `json:"bindable,omitempty" bson:"bindable"`
-	Schemas     *Schemas    `json:"schemas,omitempty" bson:"schemas"`
+	Schemas *Schemas `json:"schemas,omitempty" bson:"schemas"`
 }
 
 type Schemas struct {
