@@ -120,6 +120,7 @@ Http Code   | JSON
 ----------- | -------------
 200         | 套餐列表信息
 400         | 参数不规范错误
+409         | 服务名称冲突
 500         | server error
 
 #### POST /seapi/services/{service_id}/plans/{plan_name}
@@ -142,6 +143,7 @@ Http Code   | JSON
 ----------- | -------------
 200         | 套餐列表信息
 400         | 参数不规范错误
+409         | 套餐名称冲突
 500         | server error
 
 #### PUT /seapi/services/:service_id", planapi.UpdataService)
