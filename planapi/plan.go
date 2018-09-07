@@ -290,7 +290,7 @@ func ProvisionService(c *gin.Context) {
 	service_id := tools.Getuuid()
 
 	_, err := etcdclient.GetEtcdApi().Set(context.Background(),
-		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id,
+		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan",
 		"",
 		&client.SetOptions{Dir: true})
 	if err != nil {
