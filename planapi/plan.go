@@ -454,7 +454,7 @@ func DeprovisionService(c *gin.Context) {
 	sId := c.Param("service_id")
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId
-	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{Recursive:true,Dir:true})
 	if err != nil {
 		log.Logger.Error("Can not DeprovisionService service from etcd", err)
 		errinfo := ErrorResponse{}
@@ -472,7 +472,7 @@ func DeprovisionPlan(c *gin.Context) {
 	etcdC := etcdclient.GetEtcdApi()
 	key := KEY + "/" + sId + "/plan/" + pId
 
-	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
+	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{Recursive:true,Dir:true})
 	if err != nil {
 		log.Logger.Error("Can not DeprovisionPlan plan from etcd", err)
 		errinfo := ErrorResponse{}
