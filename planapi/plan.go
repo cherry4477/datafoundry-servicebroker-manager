@@ -425,8 +425,15 @@ func UpdataService(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
+	if checkName(KEY, pservice.Name) {
+		log.Logger.Debug("Service name:" + pservice.Name + " conflict in the service:" + sId)
+		errinfo := ErrorResponse{}
+		errinfo.Error = errors.New("Service name conflict in the service").Error()
+		errinfo.Description = "Service name:" + pservice.Name + " conflict in the service:" + sId
+		c.JSON(http.StatusConflict, errinfo)
+		return
+	}
 	etcdC := etcdclient.GetEtcdApi()
-	req := &client.Response{}
 	mValue, err := getTag(&pservice)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
@@ -434,17 +441,17 @@ func UpdataService(c *gin.Context) {
 	}
 	for mk, mv := range mValue {
 		mkey := key + "/" + mk
-		req, err = etcdC.Update(context.Background(), mkey, mv)
+		_, err = etcdC.Update(context.Background(), mkey, mv)
 		if err != nil {
 			log.Logger.Error("Can not UpdataService service from etcd", err)
 			errinfo := ErrorResponse{}
 			errinfo.Error = err.Error()
 			errinfo.Description = "can not updata service from etcd"
-			c.JSON(http.StatusNotImplemented, errinfo)
+			c.JSON(http.StatusInternalServerError, errinfo)
 			return
 		}
 	}
-	c.JSON(http.StatusOK, req.Node)
+	c.JSON(http.StatusOK, mValue)
 	return
 }
 
@@ -464,8 +471,15 @@ func UpdataPlan(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
+	if checkName(KEY+"/"+sId+"/plan", plans.Name) {
+		log.Logger.Debug("Plan name:" + plans.Name + " conflict in the service:" + sId)
+		errinfo := ErrorResponse{}
+		errinfo.Error = errors.New("plan name conflict in the service").Error()
+		errinfo.Description = "plan name:" + plans.Name + " conflict in the service:" + sId
+		c.JSON(http.StatusConflict, errinfo)
+		return
+	}
 	etcdC := etcdclient.GetEtcdApi()
-	req := &client.Response{}
 	mValue, err := getTag(&plans)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
@@ -473,17 +487,17 @@ func UpdataPlan(c *gin.Context) {
 	}
 	for mk, mv := range mValue {
 		mkey := key + "/" + mk
-		req, err = etcdC.Update(context.Background(), mkey, mv)
+		_, err = etcdC.Update(context.Background(), mkey, mv)
 		if err != nil {
 			log.Logger.Error("Can not UpdataPlan service from etcd", err)
 			errinfo := ErrorResponse{}
 			errinfo.Error = err.Error()
 			errinfo.Description = "can not updata service from etcd"
-			c.JSON(http.StatusNotImplemented, errinfo)
+			c.JSON(http.StatusInternalServerError, errinfo)
 			return
 		}
 	}
-	c.JSON(http.StatusOK, req.Node)
+	c.JSON(http.StatusOK, mValue)
 	return
 }
 
@@ -497,7 +511,7 @@ func DeprovisionService(c *gin.Context) {
 		errinfo := ErrorResponse{}
 		errinfo.Error = err.Error()
 		errinfo.Description = "can not delete service from etcd"
-		c.JSON(http.StatusNotImplemented, errinfo)
+		c.JSON(http.StatusInternalServerError, errinfo)
 		return
 	}
 	c.JSON(http.StatusOK, req.Node)
@@ -515,7 +529,7 @@ func DeprovisionPlan(c *gin.Context) {
 		errinfo := ErrorResponse{}
 		errinfo.Error = err.Error()
 		errinfo.Description = "can not delete plan from etcd"
-		c.JSON(http.StatusNotImplemented, errinfo)
+		c.JSON(http.StatusInternalServerError, errinfo)
 		return
 	}
 	c.JSON(http.StatusOK, req.Node)

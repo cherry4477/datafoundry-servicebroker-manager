@@ -107,7 +107,7 @@ Path参数
 
 curl样例：
 ```
-curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/test_001 -d '{
+curl -i -X POST http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/test_001 -d '{
  "description":"service test instance",
  "bindable":true,
  "tags": ["service","test"],
@@ -146,10 +146,77 @@ Http Code   | JSON
 409         | 套餐名称冲突
 500         | server error
 
-#### PUT /seapi/services/:service_id", planapi.UpdataService)
+#### PUT /seapi/services/{service_id}
+更新一个服务。
 
-#### PUT /seapi/services/:service_id/plans/:plan_id", planapi.UpdataPlan)
+Path参数
+* `service_id`: 服务ID。
 
-#### DELETE /seapi/services/:service_id", planapi.DeprovisionService)
+curl样例：
+```
+curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed 
+-d '{"description":"test_2","metadata": {"bullets":["5 GB of Disk","5 connections"],
+"displayName":"Shared and Plan Test2" },"free":true}' 
+ -H "Content-Type: application/json"
+```
+#####返回值
+Http Code   | JSON
+----------- | -------------
+200         | 服务列表信息
+400         | 参数不规范错误
+409         | 服务名称冲突
+500         | server error
 
-#### DELETE /seapi/services/:service_id/plans/:plan_id", planapi.DeprovisionPlan)
+#### PUT /seapi/services/{service_id}/plans/{plan_id}
+更新服务下的套餐
+
+Path参数
+* `service_id`: 服务ID。
+* `plan_id`: 套餐ID。
+
+curl样例：
+```
+curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed/plans/521a4a06-175a-43e6-b1bc-d9c684f76a0d
+ -d '{"description":"test_1","metadata": {"bullets":["6 GB of Disk","6 connections"],"displayName":"Shared and Plan Test1" },
+ "free":true}'  
+ -H "Content-Type: application/json"
+```
+#####返回值
+Http Code   | JSON
+----------- | -------------
+200         | 套餐列表信息
+400         | 参数不规范错误
+409         | 服务名称冲突
+500         | server error
+
+#### DELETE /seapi/services/{service_id}
+删除服务
+
+Path参数
+* `service_id`: 服务ID。
+
+curl样例：
+```
+curl -i -X DELETE http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed/plans/521a4a06-175a-43e6-b1bc-d9c684f76a0d
+```
+#####返回值
+Http Code   | JSON
+----------- | -------------
+200         | ok
+500         | server error
+#### DELETE /seapi/services/{service_id}/plans/{plan_id}
+删除服务下的套餐
+
+Path参数
+* `service_id`: 服务ID。
+* `plan_id`: 套餐ID。
+
+curl样例：
+```
+curl -i -X DELETE http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed/plans/521a4a06-175a-43e6-b1bc-d9c684f76a0d
+```
+#####返回值
+Http Code   | JSON
+----------- | -------------
+200         | ok
+500         | server error
