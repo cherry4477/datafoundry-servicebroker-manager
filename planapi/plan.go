@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"github.com/asiainfoLDP/datafactory/Godeps/_workspace/src/k8s.io/kubernetes/third_party/golang/go/doc/testdata"
 )
 
 const (
@@ -256,9 +257,37 @@ func PollingPlans(c *gin.Context) {
 	return
 }
 
+func checkName(path,name string) bool {
+	resp, _ := etcdclient.GetEtcdApi().Get(context.Background(),
+		path,
+		&client.GetOptions{Recursive: true})
+	for i := 0; i < len(resp.Node.Nodes); i++ {
+		for j := 0; j < len(resp.Node.Nodes[i].Nodes); j++ {
+			lowerkey := strings.ToLower(resp.Node.Nodes[i].Key)+"/name"
+			if lowerkey == strings.ToLower(resp.Node.Nodes[i].Nodes[j].Key) {
+				if name ==resp.Node.Nodes[i].Nodes[j].Value{
+					return true
+				}
+			}else{
+				continue
+			}
+		}
+	}
+	return false
+}
+
 ///seapi/services/:service_name
 func ProvisionService(c *gin.Context) {
 	service_name := c.Param("service_id")
+
+	if checkName("/servicebroker/"+log.ServcieBrokerName+"/catalog",service_name){
+		log.Logger.Debug("Service name:"+service_name+" conflict")
+		errinfo := ErrorResponse{}
+		errinfo.Error = errors.New("service name:"+service_name+" conflict").Error()
+		errinfo.Description = "service name:"+service_name+" conflict"
+		c.JSON(409, errinfo)
+		return
+	}
 
 	service_id := tools.Getuuid()
 
@@ -320,9 +349,19 @@ func ProvisionService(c *gin.Context) {
 func ProvisionPlan(c *gin.Context) {
 	service_id := c.Param("service_id")
 	plan_name := c.Param("plan_id")
+
+	if checkName("/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan",plan_name){
+		log.Logger.Debug("Plan name:"+plan_name+" conflict in the service:"+service_id)
+		errinfo := ErrorResponse{}
+		errinfo.Error = errors.New("plan name conflict in the service").Error()
+		errinfo.Description = "plan name:"+plan_name+" conflict in the service:"+service_id
+		c.JSON(409, errinfo)
+		return
+	}
+
 	plan_id := tools.Getuuid()
 	_, err := etcdclient.GetEtcdApi().Set(context.Background(),
-		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan",
+		"/servicebroker/"+log.ServcieBrokerName+"/catalog/"+service_id+"/plan/"+plan_id,
 		"",
 		&client.SetOptions{Dir: true})
 	if err != nil {
