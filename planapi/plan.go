@@ -390,7 +390,11 @@ func UpdataService(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	mValue := getTag(&pservice)
+	mValue,err := getTag(&pservice)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
 	for mk, mv := range mValue {
 		mkey := key + "/" + mk
 		req, err = etcdC.Update(context.Background(), mkey, mv)
@@ -410,10 +414,10 @@ func UpdataService(c *gin.Context) {
 func UpdataPlan(c *gin.Context) {
 	sId := c.Param("service_id")
 	pId := c.Param("plan_id")
-	key := KEY + "/" + sId + "/plan" + pId
+	key := KEY + "/" + sId + "/plan/" + pId
 	rBody, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "metrics": err})
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	defer c.Request.Body.Close()
@@ -425,7 +429,11 @@ func UpdataPlan(c *gin.Context) {
 	}
 	etcdC := etcdclient.GetEtcdApi()
 	req := &client.Response{}
-	mValue := getTag(&plans)
+	mValue,err := getTag(&plans)
+	if err != nil{
+		c.JSON(http.StatusBadRequest,err)
+		return
+	}
 	for mk, mv := range mValue {
 		mkey := key + "/" + mk
 		req, err = etcdC.Update(context.Background(), mkey, mv)
@@ -462,7 +470,7 @@ func DeprovisionPlan(c *gin.Context) {
 	sId := c.Param("service_id")
 	pId := c.Param("plan_id")
 	etcdC := etcdclient.GetEtcdApi()
-	key := KEY + "/" + sId + "/plan" + pId
+	key := KEY + "/" + sId + "/plan/" + pId
 
 	req, err := etcdC.Delete(context.Background(), key, &client.DeleteOptions{})
 	if err != nil {
@@ -477,7 +485,7 @@ func DeprovisionPlan(c *gin.Context) {
 	return
 }
 
-func getTag(u interface{}) (value map[string]string) {
+func getTag(u interface{}) (value map[string]string,err error) {
 	t := reflect.TypeOf(u)
 	v := reflect.ValueOf(u)
 	value = make(map[string]string)
@@ -495,15 +503,14 @@ func getTag(u interface{}) (value map[string]string) {
 					value[tag] = val
 				}
 			}
-			//TODO: interface 重新转换
 		case reflect.Interface:
 			{
-				var met interface{}
-				val := fmt.Sprintf("%v", vName.Interface())
-				json.Unmarshal([]byte(val),&met)
-				strJ,_ := json.Marshal(met)
 				tag := field.Tag.Get("bson")
-				fmt.Println("--- strJ is  ",string(strJ))
+				strJ,err := json.Marshal(vName.Interface())
+				if err != nil{
+					log.Logger.Error("json Marshal error ", err)
+					return nil,err
+				}
 				value[tag] = string(strJ)
 			}
 		case reflect.Bool:
