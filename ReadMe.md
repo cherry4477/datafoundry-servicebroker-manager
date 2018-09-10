@@ -99,7 +99,7 @@ curl -i -X POST http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/test_
 请求体：
 
 | 参数   | 类型| 是否必传|
-|--- | ---|
+|--- | ---|---|
 |Name | string| 否|
 |Id | string|否|
 |Description | string|是|
@@ -127,7 +127,7 @@ curl -i -X POST http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/df17b
 请求体：
 
 | 参数   | 类型| 是否必传|
-|--- | ---|
+|--- | ---|---|
 |Name | string| 否|
 |Id | string|否|
 |Description | string|是|
@@ -153,7 +153,7 @@ curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126
 请求体：
 
 | 参数   | 类型| 是否必传|
-|--- | ---|
+|--- | ---|---|
 |Name | string| 否|
 |Id | string|否|
 |Description | string|是|
@@ -182,7 +182,7 @@ curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126
 请求体：
 
 | 参数   | 类型| 是否必传|
-|--- | ---|
+|--- | ---|---|
 |Name | string| 否|
 |Id | string|否|
 |Description | string|是|
