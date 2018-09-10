@@ -44,11 +44,6 @@ curl样例：
 ```
 curl -i -X GET http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/catalog
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 服务套餐列表
-500         | etcd error
 
 #### GET /seapi/services/{service_id}
 获取某个服务信息。
@@ -60,11 +55,6 @@ curl样例：
 ```
 curl -i -X GET http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/df17b082-a5a3-47d2-a42a-45c8dd285c70
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 服务信息
-500         | etcd error
 
 #### GET /seapi/services/{service_id}/plans/{plan_id}
 获取某个服务下套餐信息。
@@ -77,11 +67,6 @@ curl样例：
 ```
 curl -i -X GET http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/df17b082-a5a3-47d2-a42a-45c8dd285c70/plans/0DA6918E-9D72-4A54-A75C-E0B7F9647300
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 套餐信息
-500         | etcd error
 
 #### GET /seapi/services/{service_id}/plans
 获取某个服务下所有套餐信息列表。
@@ -93,11 +78,6 @@ curl样例：
 ```
 curl -i -X GET http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/df17b082-a5a3-47d2-a42a-45c8dd285c70/plans
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 套餐列表信息
-500         | etcd error
 
 #### POST /seapi/services/{service_name}
 创建一个服务。
@@ -115,13 +95,19 @@ curl -i -X POST http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/test_
  "metadata": {"bullets":["20 GB of Disk","20 connections"],"displayName":"Shared and Free"}
 }'  -H "Content-Type: application/json"
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 套餐列表信息
-400         | 参数不规范错误
-409         | 服务名称冲突
-500         | server error
+
+请求体：
+
+| 参数   | 类型| 是否必传|
+|--- | ---|
+|Name | string| 否|
+|Id | string|否|
+|Description | string|是|
+|Tags | []string|否|
+|Bindable | bool|是|
+|Metadata | interface{}|是|
+|PlanUpdatable | bool|是|
+|Plans | []plan|否|
 
 #### POST /seapi/services/{service_id}/plans/{plan_name}
 在某个服务下创建一个套餐。
@@ -138,13 +124,15 @@ curl -i -X POST http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/df17b
  "metadata": {"bullets":["20 GB of Disk","20 connections"],"displayName":"Shared and Free" }
 }'  -H "Content-Type: application/json"
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 套餐列表信息
-400         | 参数不规范错误
-409         | 套餐名称冲突
-500         | server error
+请求体：
+
+| 参数   | 类型| 是否必传|
+|--- | ---|
+|Name | string| 否|
+|Id | string|否|
+|Description | string|是|
+|Metadata | interface{}|是|
+|Free | bool|是|
 
 #### PUT /seapi/services/{service_id}
 更新一个服务。
@@ -161,13 +149,19 @@ curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126
 "displayName":"Shared and Plan Test2" },"free":true}' 
  -H "Content-Type: application/json"
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 服务列表信息
-400         | 参数不规范错误
-409         | 服务名称冲突
-500         | server error
+
+请求体：
+
+| 参数   | 类型| 是否必传|
+|--- | ---|
+|Name | string| 否|
+|Id | string|否|
+|Description | string|是|
+|Tags | []string|否|
+|Bindable | bool|是|
+|Metadata | interface{}|是|
+|PlanUpdatable | bool|是|
+|Plans | []plan|否|
 
 #### PUT /seapi/services/{service_id}/plans/{plan_id}
 更新服务下的套餐
@@ -185,13 +179,16 @@ curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126
  "free":true}'  
  -H "Content-Type: application/json"
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | 套餐列表信息
-400         | 参数不规范错误
-409         | 服务名称冲突
-500         | server error
+请求体：
+
+| 参数   | 类型| 是否必传|
+|--- | ---|
+|Name | string| 否|
+|Id | string|否|
+|Description | string|是|
+|Metadata | interface{}|是|
+|Free | bool|是|
+
 
 #### DELETE /seapi/services/{service_id}
 删除服务
@@ -203,11 +200,6 @@ curl样例：
 ```
 curl -i -X DELETE http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed/plans/521a4a06-175a-43e6-b1bc-d9c684f76a0d
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | ok
-500         | server error
 #### DELETE /seapi/services/{service_id}/plans/{plan_id}
 删除服务下的套餐
 
@@ -219,8 +211,10 @@ curl样例：
 ```
 curl -i -X DELETE http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed/plans/521a4a06-175a-43e6-b1bc-d9c684f76a0d
 ```
-#####返回值
-Http Code   | JSON
------------ | -------------
-200         | ok
-500         | server error
+### 错误码
+| Http Code   | JSON|
+|--- | ---|
+|200         | 套餐列表信息|
+|400         | 参数不规范错误|
+|409         | 服务名称冲突|
+|500         | server error|
