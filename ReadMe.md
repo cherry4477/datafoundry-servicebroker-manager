@@ -152,6 +152,8 @@ Http Code   | JSON
 Path参数
 * `service_id`: 服务ID。
 
+**注：bindable、PlanUpdatable两个字段为bool类型，为必传字段**
+
 curl样例：
 ```
 curl -i -X PUT http://asiainfoLDP:2016asia@127.0.0.1:10000/seapi/services/dfc126e9-181a-4d13-a367-f84edfe617ed 
@@ -173,6 +175,8 @@ Http Code   | JSON
 Path参数
 * `service_id`: 服务ID。
 * `plan_id`: 套餐ID。
+
+**注：free字段为bool类型，为必传字段**
 
 curl样例：
 ```
