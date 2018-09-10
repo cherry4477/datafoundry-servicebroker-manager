@@ -36,7 +36,7 @@ func main() {
 func handle() (router *gin.Engine) {
 	//设置全局环境：1.开发环境（gin.DebugMode） 2.线上环境（gin.ReleaseMode）
 	//gin.SetMode(gin.ReleaseMode)
-	gin.SetMode(gin.DebugMode)
+	gin.SetMode(gin.ReleaseMode)
 
 	//获取路由实例
 	router = gin.Default()

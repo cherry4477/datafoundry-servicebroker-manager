@@ -10,7 +10,7 @@ type Service struct {
 	Metadata interface{} `json:"metadata" bson:"metadata"`
 	//Dashboard_client *DashboardClient `json:"dashboard_client,omitempty" bson:"dashboardclient"`
 	PlanUpdatable bool   `json:"plan_updateable" bson:"planupdatable"`
-	Plans         []Plan `json:"plans" bson:"plans"`
+	Plans         []Plan `json:"plans"`
 }
 
 type Plan struct {
