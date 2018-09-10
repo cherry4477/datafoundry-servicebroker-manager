@@ -440,9 +440,9 @@ curl -i -X DELETE http://$SEAPIUSER:$SEAPIPASSWORD@127.0.0.1:10000/seapi/service
 
 ### 错误码
 | Http Code   | JSON|
-|--- | ---|
-|200         | 套餐列表信息|
-|400         | 参数不规范错误|
-|401         | API身份认证错误|
-|409         | 服务名称冲突|
-|500         | server error|
+| --- | ---|
+| 200         | JSON信息|
+| 400         | 参数错误|
+| 401         | API身份认证错误|
+| 409         | 服务或套餐名称冲突|
+| 500         | server error|
