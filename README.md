@@ -1,6 +1,6 @@
 # servicebroker-plan-api
 
-### servicebroker-plan-api和版本
+## servicebroker-plan-api和版本
 
 本程序为ServiceBroker的服务及套餐的增删改查API。
 版本为v1。
@@ -439,10 +439,11 @@ curl -i -X DELETE http://$SEAPIUSER:$SEAPIPASSWORD@127.0.0.1:10000/seapi/service
 ```
 
 ### 错误码
-| Http Code   | JSON|
-|--- | ---|
-|200         | 套餐列表信息|
-|400         | 参数不规范错误|
-|401         | API身份认证错误|
-|409         | 服务名称冲突|
-|500         | server error|
+| Http Code   | 结果或原因|
+| --- | ---|
+| 200         | JSON信息|
+| 400         | 参数错误|
+| 401         | API身份认证错误|
+| 409         | 服务或套餐名称冲突|
+| 500         | server error|
+

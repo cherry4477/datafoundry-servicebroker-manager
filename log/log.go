@@ -5,11 +5,11 @@ import (
 	"os"
 )
 
-const ServcieName = "service_plan"
+const ServcieBrokerName = "openshift"
 
 var Logger lager.Logger
 
 func init() {
-	Logger = lager.NewLogger(ServcieName)
+	Logger = lager.NewLogger(ServcieBrokerName)
 	Logger.RegisterSink(lager.NewWriterSink(os.Stdout, lager.INFO))
 }
