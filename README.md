@@ -439,7 +439,7 @@ curl -i -X DELETE http://$SEAPIUSER:$SEAPIPASSWORD@127.0.0.1:10000/seapi/service
 ```
 
 ### 错误码
-| Http Code   | JSON|
+| Http Code   | 结果或原因|
 | --- | ---|
 | 200         | JSON信息|
 | 400         | 参数错误|
