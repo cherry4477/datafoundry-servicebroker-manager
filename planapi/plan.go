@@ -570,6 +570,12 @@ func getTag(u interface{}) (value map[string]string, err error) {
 				tag := field.Tag.Get("bson")
 				value[tag] = val
 			}
+		case reflect.Array, reflect.Slice:
+			{
+				strVal := strings.Replace(strings.Trim(fmt.Sprint(vName.Interface()), "[]"), " ", ",", -1)
+				tag := field.Tag.Get("bson")
+				value[tag] = strVal
+			}
 		default:
 			{
 				if vName.Len() > 0 {
