@@ -11,6 +11,7 @@ import (
 )
 
 var port string
+var etcdclient tools.EtcdClient
 
 func init() {
 	port = os.Getenv("PLANPORT")
@@ -40,10 +41,26 @@ func handle() (router *gin.Engine) {
 	//获取路由实例
 	router = gin.Default()
 
-	//var username, password string
+	var username, password string
+
+	resp, err := etcdclient.Etcdget("/servicebroker/" + log.ServcieBrokerName + "/username")
+	if err != nil {
+		log.Logger.Error("Can not init username,Progrom Exit!", err)
+		os.Exit(1)
+	} else {
+		username = resp.Node.Value
+	}
+
+	resp, err = etcdclient.Etcdget("/servicebroker/" + log.ServcieBrokerName + "/password")
+	if err != nil {
+		log.Logger.Error("Can not init password,Progrom Exit!", err)
+		os.Exit(1)
+	} else {
+		password = resp.Node.Value
+	}
 	router.Use(gin.BasicAuth(gin.Accounts{
-		"asiainfoLDP": "2016asia",
-		//username: password,
+		//"asiainfoLDP": "2016asia",
+		username: password,
 	}))
 
 	router.GET("/seapi/catalog", planapi.Catalog)
