@@ -1,7 +1,7 @@
 package tools
 
 import (
-	log "github.com/asiainfoLDP/servicebroker-plan-api/log"
+	log "github.com/asiainfoldp/datafoundry-servicebroker-manager/log"
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 	"time"

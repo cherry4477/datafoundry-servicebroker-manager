@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/asiainfoLDP/servicebroker-plan-api/log"
-	"github.com/asiainfoLDP/servicebroker-plan-api/planapi"
-	"github.com/asiainfoLDP/servicebroker-plan-api/tools"
+	"github.com/asiainfoldp/datafoundry-servicebroker-manager/log"
+	"github.com/asiainfoldp/datafoundry-servicebroker-manager/planapi"
+	"github.com/asiainfoldp/datafoundry-servicebroker-manager/tools"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
