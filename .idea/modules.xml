@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/servicebroker-plan-api.iml" filepath="$PROJECT_DIR$/.idea/servicebroker-plan-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/datafoundry-servicebroker-manager.iml" filepath="$PROJECT_DIR$/.idea/datafoundry-servicebroker-manager.iml" />
     </modules>
   </component>
 </project>
